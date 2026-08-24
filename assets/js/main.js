@@ -298,141 +298,159 @@ $("#cart-clear").addEventListener("click", () => {
 renderCart();
 
 /* =========================================================
-   Gallery carousel
+   Gallery story player
+   Instagram-style: segmented progress bars, auto-advance,
+   tap the sides to move, hold to pause.
    ========================================================= */
-const track = $("#track");
-const slides = $$(".slide", track);
-const dotsWrap = $("#dots");
-const prevBtn = $("#prev");
-const nextBtn = $("#next");
-let current = 0;
-let autoplayTimer;
 
-const dots = slides.map((_, i) => {
-  const dot = document.createElement("button");
-  dot.type = "button";
-  dot.setAttribute("role", "tab");
-  dot.setAttribute("aria-label", `Photo ${i + 1} of ${slides.length}`);
-  dot.addEventListener("click", () => {
-    goTo(i);
-    stopAutoplay();
-  });
-  dotsWrap.append(dot);
-  return dot;
+/* How long each photo holds, in seconds. */
+const STORY_SECONDS = 5;
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const story      = $("#story");
+const storyFrame = $("#story-frame");
+const barsWrap   = $("#story-bars");
+const storySlides = $$(".story__slide", story);
+
+let storyIdx = 0;
+let userPaused = false;
+let offScreen = true;
+let held = false;
+
+story.style.setProperty("--story-dur", `${STORY_SECONDS}s`);
+
+/* --- progress bars, one per photo --- */
+const bars = storySlides.map((slide, i) => {
+  const bar = document.createElement("button");
+  bar.type = "button";
+  bar.className = "story__bar";
+  bar.setAttribute("role", "tab");
+  bar.setAttribute("aria-label", `Photo ${i + 1} of ${storySlides.length}`);
+  bar.addEventListener("click", () => goStory(i));
+  barsWrap.append(bar);
+  return bar;
 });
 
-function goTo(index) {
-  current = Math.max(0, Math.min(slides.length - 1, index));
-  const slide = slides[current];
-  // Centre the slide inside the viewport without scrolling the page.
-  track.scrollTo({
-    left: slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2,
-    behavior: "smooth"
-  });
-  syncUI();
+function updatePaused() {
+  story.classList.toggle("is-paused", userPaused || offScreen || held);
 }
 
-function syncUI() {
-  dots.forEach((dot, i) => {
-    dot.classList.toggle("is-active", i === current);
-    dot.setAttribute("aria-selected", String(i === current));
+function goStory(i) {
+  storyIdx = (i + storySlides.length) % storySlides.length;
+
+  storySlides.forEach((slide, n) => slide.classList.toggle("is-active", n === storyIdx));
+
+  bars.forEach((bar, n) => {
+    bar.classList.toggle("is-done", n < storyIdx);
+    bar.classList.remove("is-active");
+    bar.setAttribute("aria-selected", String(n === storyIdx));
   });
-  prevBtn.disabled = current === 0;
-  nextBtn.disabled = current === slides.length - 1;
+
+  // restart the fill animation on the bar that is now current
+  const bar = bars[storyIdx];
+  bar.style.animation = "none";
+  void bar.offsetWidth;
+  bar.style.animation = "";
+  bar.classList.add("is-active");
 }
 
-/* Keep the active index in step with manual scrolling / swiping */
-let scrollTick;
-track.addEventListener("scroll", () => {
-  clearTimeout(scrollTick);
-  scrollTick = setTimeout(() => {
-    const centre = track.scrollLeft + track.clientWidth / 2;
-    let nearest = 0;
-    let best = Infinity;
-    slides.forEach((slide, i) => {
-      const distance = Math.abs(slide.offsetLeft + slide.clientWidth / 2 - centre);
-      if (distance < best) { best = distance; nearest = i; }
-    });
-    current = nearest;
-    syncUI();
-  }, 90);
-});
+const nextStory = () => goStory(storyIdx + 1);
+const prevStory = () => goStory(storyIdx - 1);
 
-prevBtn.addEventListener("click", () => { goTo(current - 1); stopAutoplay(); });
-nextBtn.addEventListener("click", () => { goTo(current + 1); stopAutoplay(); });
-
-track.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowRight") { e.preventDefault(); goTo(current + 1); stopAutoplay(); }
-  if (e.key === "ArrowLeft")  { e.preventDefault(); goTo(current - 1); stopAutoplay(); }
-});
-
-/* Click-and-drag on desktop.
-   Pointer capture is claimed only once the pointer actually moves, so a plain
-   click still reaches the image underneath (and opens the lightbox). */
-const DRAG_THRESHOLD = 5;
-let pendingDrag = false;
-let dragging = false;
-let dragStartX = 0;
-let dragStartScroll = 0;
-let dragMoved = 0;
-
-track.addEventListener("pointerdown", (e) => {
-  dragMoved = 0;
-  if (e.pointerType === "touch") return; // native touch scrolling is better
-  pendingDrag = true;
-  dragStartX = e.clientX;
-  dragStartScroll = track.scrollLeft;
-});
-
-track.addEventListener("pointermove", (e) => {
-  if (!pendingDrag && !dragging) return;
-  const delta = e.clientX - dragStartX;
-  dragMoved = Math.abs(delta);
-
-  if (!dragging) {
-    if (dragMoved < DRAG_THRESHOLD) return;
-    dragging = true;
-    pendingDrag = false;
-    track.classList.add("is-dragging");
-    track.setPointerCapture(e.pointerId);
-    stopAutoplay();
+/* The bar's own animation ending is what advances the story, so pausing the
+   animation pauses the story — one mechanism, nothing to keep in sync. */
+barsWrap.addEventListener("animationend", (e) => {
+  if (e.animationName === "storyFill" && e.target.classList.contains("is-active")) {
+    nextStory();
   }
-  track.scrollLeft = dragStartScroll - delta;
 });
 
-function endDrag(e) {
-  pendingDrag = false;
-  if (!dragging) return;
-  dragging = false;
-  track.classList.remove("is-dragging");
-  if (e.pointerId != null && track.hasPointerCapture?.(e.pointerId)) {
-    track.releasePointerCapture(e.pointerId);
-  }
-}
-track.addEventListener("pointerup", endDrag);
-track.addEventListener("pointercancel", endDrag);
-track.addEventListener("pointerleave", endDrag);
+/* --- tap zones --- */
+$("#zone-prev").addEventListener("click", () => { if (!held) prevStory(); });
+$("#zone-next").addEventListener("click", () => { if (!held) nextStory(); });
+$("#story-prev").addEventListener("click", prevStory);
+$("#story-next").addEventListener("click", nextStory);
 
-/* Lightbox */
+/* --- hold anywhere on the frame to pause --- */
+let holdTimer;
+storyFrame.addEventListener("pointerdown", () => {
+  holdTimer = setTimeout(() => { held = true; updatePaused(); }, 220);
+});
+function releaseHold() {
+  clearTimeout(holdTimer);
+  if (!held) return;
+  // let the click that follows fall through without changing photo
+  setTimeout(() => { held = false; updatePaused(); }, 0);
+}
+storyFrame.addEventListener("pointerup", releaseHold);
+storyFrame.addEventListener("pointercancel", releaseHold);
+storyFrame.addEventListener("pointerleave", releaseHold);
+
+/* --- explicit pause button (also covers keyboard users) --- */
+const pauseBtn = $("#story-pause");
+pauseBtn.addEventListener("click", () => {
+  userPaused = !userPaused;
+  pauseBtn.setAttribute("aria-pressed", String(userPaused));
+  pauseBtn.setAttribute("aria-label", userPaused ? "Play the story" : "Pause the story");
+  updatePaused();
+});
+
+/* --- keyboard --- */
+storyFrame.tabIndex = 0;
+storyFrame.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") { e.preventDefault(); nextStory(); }
+  if (e.key === "ArrowLeft")  { e.preventDefault(); prevStory(); }
+  if (e.key === " ")          { e.preventDefault(); pauseBtn.click(); }
+});
+
+/* --- swipe --- */
+let swipeX = null;
+storyFrame.addEventListener("touchstart", (e) => { swipeX = e.touches[0].clientX; }, { passive: true });
+storyFrame.addEventListener("touchend", (e) => {
+  if (swipeX === null) return;
+  const dx = e.changedTouches[0].clientX - swipeX;
+  if (Math.abs(dx) > 45) dx < 0 ? nextStory() : prevStory();
+  swipeX = null;
+}, { passive: true });
+
+/* --- only run while it is on screen --- */
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver((entries) => {
+    entries.forEach((entry) => { offScreen = !entry.isIntersecting; });
+    updatePaused();
+  }, { threshold: 0.35 }).observe(story);
+} else {
+  offScreen = false;
+}
+
+document.addEventListener("visibilitychange", () => {
+  offScreen = document.hidden;
+  updatePaused();
+});
+
+/* --- full-size view --- */
 const lightbox = $("#lightbox");
 const lbImg = $("#lb-img");
 
-slides.forEach((slide) => {
-  const img = $("img", slide);
-  img.addEventListener("click", () => {
-    if (dragMoved > DRAG_THRESHOLD) return; // that was a drag, not a click
-    lbImg.src = img.currentSrc || img.src;
-    lbImg.alt = img.alt;
-    lightbox.hidden = false;
-    document.body.style.overflow = "hidden";
-    $("#lb-close").focus();
-  });
+$("#story-expand").addEventListener("click", () => {
+  const slide = storySlides[storyIdx];
+  const img = $(".story__photo", slide);
+  lbImg.src = slide.dataset.full || img.currentSrc || img.src;
+  lbImg.alt = img.alt;
+  lightbox.hidden = false;
+  document.body.style.overflow = "hidden";
+  offScreen = true;
+  updatePaused();
+  $("#lb-close").focus();
 });
 
 function closeLightbox() {
   lightbox.hidden = true;
   lbImg.src = "";
   document.body.style.overflow = "";
+  offScreen = false;
+  updatePaused();
 }
 $("#lb-close").addEventListener("click", closeLightbox);
 lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
@@ -440,37 +458,8 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
 });
 
-/* Autoplay — pauses on interaction, hover, or when off-screen */
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function startAutoplay() {
-  if (reduceMotion || autoplayTimer) return;
-  autoplayTimer = setInterval(() => {
-    goTo(current === slides.length - 1 ? 0 : current + 1);
-  }, 5200);
-}
-function stopAutoplay() {
-  clearInterval(autoplayTimer);
-  autoplayTimer = null;
-}
-
-const carouselEl = $("#carousel");
-carouselEl.addEventListener("mouseenter", stopAutoplay);
-carouselEl.addEventListener("focusin", stopAutoplay);
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) stopAutoplay();
-});
-
-if ("IntersectionObserver" in window) {
-  new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting && lightbox.hidden) startAutoplay();
-      else stopAutoplay();
-    });
-  }, { threshold: 0.45 }).observe(carouselEl);
-}
-
-syncUI();
+goStory(0);
+updatePaused();
 
 /* =========================================================
    Nav highlighting + reveal on scroll

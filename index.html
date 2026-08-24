@@ -59,8 +59,8 @@
 
     <nav class="nav" aria-label="Primary">
       <a href="#picks">Picks</a>
-      <a href="#menu">Menu</a>
       <a href="#gallery">Gallery</a>
+      <a href="#menu">Menu</a>
       <a href="#catering">Catering</a>
       <a href="#visit">Visit</a>
     </nav>
@@ -219,8 +219,106 @@
   </div>
 </section>
 
+<!-- ================= GALLERY — STORY PLAYER ================= -->
+<section class="section section--ink" id="gallery">
+ <div class="gallery__inner">
+  <div class="wrap gallery__copy">
+    <p class="kicker kicker--yellow">Inside 111 Parramatta Rd</p>
+    <h2 class="sechead__title sechead__title--light">Prayer flags, a Buddha wall, <br class="br-lg">and a garden lane out back</h2>
+    <p class="lede lede--light">Come for a quick momo at the counter, or take the leafy back courtyard for a long khana set with family.</p>
+  </div>
+
+  <div class="story" id="story">
+    <button class="story__nav story__nav--prev" id="story-prev" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+    </button>
+
+    <div class="story__frame" id="story-frame">
+      <div class="story__bars" id="story-bars" role="tablist" aria-label="Choose photo"></div>
+
+      <button class="story__pause" id="story-pause" aria-pressed="false" aria-label="Pause the story">
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+      </button>
+
+      <div class="story__stage" id="story-stage" aria-live="polite">
+        <figure class="story__slide is-active" data-full="assets/img/gallery/buddha-mural.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/buddha-mural-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/buddha-mural-sm.jpg" srcset="assets/img/gallery/buddha-mural-sm.jpg 900w, assets/img/gallery/buddha-mural.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Hand-painted Buddha mural with prayer flags strung across the dining room"
+               loading="eager">
+          <figcaption>The Buddha wall, painted by hand</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/dining-room.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/dining-room-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/dining-room-sm.jpg" srcset="assets/img/gallery/dining-room-sm.jpg 900w, assets/img/gallery/dining-room.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Marble tables and red chairs beneath the mural and prayer flags"
+               loading="lazy">
+          <figcaption>40 seats, prayer flags overhead</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/garden-lane.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/garden-lane-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/garden-lane-sm.jpg" srcset="assets/img/gallery/garden-lane-sm.jpg 900w, assets/img/gallery/garden-lane.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Green leaf wall and cherry blossom tree at the garden lane entrance"
+               loading="lazy">
+          <figcaption>The garden lane out back</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/nepal-wall.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/nepal-wall-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/nepal-wall-sm.jpg" srcset="assets/img/gallery/nepal-wall-sm.jpg 900w, assets/img/gallery/nepal-wall.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Photographs of Nepal — Ghandruk village, temples and mountains — along the courtyard wall"
+               loading="lazy">
+          <figcaption>Ghandruk, Bhaktapur, the hills back home</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/counter.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/counter-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/counter-sm.jpg" srcset="assets/img/gallery/counter-sm.jpg 900w, assets/img/gallery/counter.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Order counter with the Momo's Hunt sign, brass bells and drink fridges"
+               loading="lazy">
+          <figcaption>Order and pay at the counter</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/front-door.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/front-door-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/front-door-sm.jpg" srcset="assets/img/gallery/front-door-sm.jpg 900w, assets/img/gallery/front-door.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Front doors with a Nepali namaste welcome poster"
+               loading="lazy">
+          <figcaption>Namaste — come on in</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/menu-board.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/menu-board-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/menu-board-sm.jpg" srcset="assets/img/gallery/menu-board-sm.jpg 900w, assets/img/gallery/menu-board.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Yellow window board showing samosa, momo, chowmein and khana set"
+               loading="lazy">
+          <figcaption>The famous eight, on the window</figcaption>
+        </figure>
+        <figure class="story__slide" data-full="assets/img/gallery/street-sign.jpg">
+          <span class="story__bg" style="background-image:url('assets/img/gallery/street-sign-sm.jpg')" aria-hidden="true"></span>
+          <img class="story__photo" src="assets/img/gallery/street-sign-sm.jpg" srcset="assets/img/gallery/street-sign-sm.jpg 900w, assets/img/gallery/street-sign.jpg 1800w"
+               sizes="(min-width:900px) 460px, 92vw" alt="Momo's Hunt street sign with phone numbers and address"
+               loading="lazy">
+          <figcaption>Find us on Parramatta Rd</figcaption>
+        </figure>
+      </div>
+
+      <button class="story__zone story__zone--prev" id="zone-prev" aria-label="Previous photo"></button>
+      <button class="story__zone story__zone--next" id="zone-next" aria-label="Next photo"></button>
+
+      <button class="story__expand" id="story-expand" aria-label="View this photo full size">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+      </button>
+    </div>
+
+    <button class="story__nav story__nav--next" id="story-next" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>
+    </button>
+  </div>
+
+  <p class="story__hint">Tap the sides to move · hold to pause</p>
+ </div>
+</section>
+
 <!-- ================= MENU / ORDER BUILDER ================= -->
-<section class="section section--cream section--tight" id="menu">
+<section class="section section--cream" id="menu">
   <div class="wrap">
     <p class="kicker kicker--pink">Order online</p>
     <h2 class="sechead__title">Menu</h2>
@@ -343,61 +441,6 @@
   </div>
 </section>
 
-<!-- ================= GALLERY CAROUSEL ================= -->
-<section class="section section--ink" id="gallery">
-  <div class="wrap">
-    <p class="kicker kicker--yellow">Inside 111 Parramatta Rd</p>
-    <h2 class="sechead__title sechead__title--light">Prayer flags, a Buddha wall,<br class="br-lg">and a garden lane out back</h2>
-    <p class="lede lede--light">Come for a quick momo at the counter, or take the leafy back courtyard for a long khana set with family.</p>
-  </div>
-
-  <div class="carousel" id="carousel" aria-roledescription="carousel" aria-label="Photos of Momo's Hunt">
-    <div class="carousel__viewport" id="track" tabindex="0">
-      <figure class="slide">
-        <img src="assets/img/gallery/buddha-mural-sm.jpg" srcset="assets/img/gallery/buddha-mural-sm.jpg 900w, assets/img/gallery/buddha-mural.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Hand-painted Buddha mural with prayer flags strung across the dining room" loading="lazy">
-        <figcaption>The Buddha wall, painted by hand</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/dining-room-sm.jpg" srcset="assets/img/gallery/dining-room-sm.jpg 900w, assets/img/gallery/dining-room.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Marble tables and red chairs beneath the mural and prayer flags" loading="lazy">
-        <figcaption>40 seats, prayer flags overhead</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/garden-lane-sm.jpg" srcset="assets/img/gallery/garden-lane-sm.jpg 900w, assets/img/gallery/garden-lane.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Green leaf wall and cherry blossom tree at the garden lane entrance" loading="lazy">
-        <figcaption>The garden lane out back</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/nepal-wall-sm.jpg" srcset="assets/img/gallery/nepal-wall-sm.jpg 900w, assets/img/gallery/nepal-wall.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Photographs of Nepal — Ghandruk village, temples and mountains — along the courtyard wall" loading="lazy">
-        <figcaption>Ghandruk, Bhaktapur, the hills back home</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/counter-sm.jpg" srcset="assets/img/gallery/counter-sm.jpg 900w, assets/img/gallery/counter.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Order counter with the Momo's Hunt sign, brass bells and drink fridges" loading="lazy">
-        <figcaption>Order and pay at the counter</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/front-door-sm.jpg" srcset="assets/img/gallery/front-door-sm.jpg 900w, assets/img/gallery/front-door.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Front doors with a Nepali namaste welcome poster" loading="lazy">
-        <figcaption>Namaste — come on in</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/menu-board-sm.jpg" srcset="assets/img/gallery/menu-board-sm.jpg 900w, assets/img/gallery/menu-board.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Yellow window board showing samosa, momo, chowmein and khana set" loading="lazy">
-        <figcaption>The famous eight, on the window</figcaption>
-      </figure>
-      <figure class="slide">
-        <img src="assets/img/gallery/street-sign-sm.jpg" srcset="assets/img/gallery/street-sign-sm.jpg 900w, assets/img/gallery/street-sign.jpg 1800w" sizes="(min-width:900px) 60vw, 88vw" alt="Momo's Hunt street sign with phone numbers and address" loading="lazy">
-        <figcaption>Find us on Parramatta Rd</figcaption>
-      </figure>
-    </div>
-
-    <button class="carousel__btn carousel__btn--prev" id="prev" aria-label="Previous photo">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
-    </button>
-    <button class="carousel__btn carousel__btn--next" id="next" aria-label="Next photo">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>
-    </button>
-  </div>
-
-  <div class="carousel__dots" id="dots" role="tablist" aria-label="Choose photo"></div>
-</section>
-
 <!-- ================= CATERING ================= -->
 <section class="section section--yellow" id="catering">
   <div class="wrap catering">
@@ -457,7 +500,7 @@
   <div class="footer__flags" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <p class="footer__line">Open daily · Dine-in, pick-up &amp; delivery</p>
   <nav class="footer__nav" aria-label="Footer">
-    <a href="#menu">Menu</a><a href="#gallery">Gallery</a><a href="#catering">Catering</a><a href="#visit">Visit</a>
+    <a href="#gallery">Gallery</a><a href="#menu">Menu</a><a href="#catering">Catering</a><a href="#visit">Visit</a>
   </nav>
   <p class="footer__copy">© <span id="year">2026</span> Momo's Hunt Nepalese Restaurant · 111 Parramatta Rd, Granville NSW 2142</p>
 </footer>
