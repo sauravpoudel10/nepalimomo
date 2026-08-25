@@ -298,168 +298,70 @@ $("#cart-clear").addEventListener("click", () => {
 renderCart();
 
 /* =========================================================
-   Gallery story player
-   Instagram-style: segmented progress bars, auto-advance,
-   tap the sides to move, hold to pause.
+   Gallery photo rail
+   A horizontal strip of cards: hover pops a card out,
+   click opens the full-size photo.
    ========================================================= */
-
-/* How long each photo holds, in seconds. */
-const STORY_SECONDS = 5;
-
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const story      = $("#story");
-const storyFrame = $("#story-frame");
-const barsWrap   = $("#story-bars");
-const storySlides = $$(".story__slide", story);
+const rail      = $("#gallery-rail");
+const railTrack = $("#rail-track");
+const railPrev  = $("#rail-prev");
+const railNext  = $("#rail-next");
+const shotCards = $$(".shot__card", rail);
 
-let storyIdx = 0;
-let userPaused = false;
-let offScreen = true;
-let held = false;
-
-story.style.setProperty("--story-dur", `${STORY_SECONDS}s`);
-
-/* --- progress bars, one per photo --- */
-const bars = storySlides.map((slide, i) => {
-  const bar = document.createElement("button");
-  bar.type = "button";
-  bar.className = "story__bar";
-  bar.setAttribute("role", "tab");
-  bar.setAttribute("aria-label", `Photo ${i + 1} of ${storySlides.length}`);
-  bar.addEventListener("click", () => goStory(i));
-  barsWrap.append(bar);
-  return bar;
-});
-
-function updatePaused() {
-  story.classList.toggle("is-paused", userPaused || offScreen || held);
+/* One card plus the gap between cards. */
+function railStep() {
+  const card = $(".shot", railTrack);
+  if (!card) return railTrack.clientWidth * 0.8;
+  const gap = parseFloat(getComputedStyle(railTrack).columnGap) || 0;
+  return card.getBoundingClientRect().width + gap;
 }
 
-function goStory(i) {
-  storyIdx = (i + storySlides.length) % storySlides.length;
-
-  storySlides.forEach((slide, n) => slide.classList.toggle("is-active", n === storyIdx));
-
-  bars.forEach((bar, n) => {
-    bar.classList.toggle("is-done", n < storyIdx);
-    bar.classList.remove("is-active");
-    bar.setAttribute("aria-selected", String(n === storyIdx));
-  });
-
-  // restart the fill animation on the bar that is now current
-  const bar = bars[storyIdx];
-  bar.style.animation = "none";
-  void bar.offsetWidth;
-  bar.style.animation = "";
-  bar.classList.add("is-active");
+function railScroll(dir) {
+  railTrack.scrollBy({ left: dir * railStep(), behavior: "smooth" });
 }
 
-const nextStory = () => goStory(storyIdx + 1);
-const prevStory = () => goStory(storyIdx - 1);
+railPrev.addEventListener("click", () => railScroll(-1));
+railNext.addEventListener("click", () => railScroll(1));
 
-/* The bar's own animation ending is what advances the story, so pausing the
-   animation pauses the story — one mechanism, nothing to keep in sync. */
-barsWrap.addEventListener("animationend", (e) => {
-  if (e.animationName === "storyFill" && e.target.classList.contains("is-active")) {
-    nextStory();
-  }
-});
-
-/* --- tap zones --- */
-$("#zone-prev").addEventListener("click", () => { if (!held) prevStory(); });
-$("#zone-next").addEventListener("click", () => { if (!held) nextStory(); });
-$("#story-prev").addEventListener("click", prevStory);
-$("#story-next").addEventListener("click", nextStory);
-
-/* --- hold anywhere on the frame to pause --- */
-let holdTimer;
-storyFrame.addEventListener("pointerdown", () => {
-  holdTimer = setTimeout(() => { held = true; updatePaused(); }, 220);
-});
-function releaseHold() {
-  clearTimeout(holdTimer);
-  if (!held) return;
-  // let the click that follows fall through without changing photo
-  setTimeout(() => { held = false; updatePaused(); }, 0);
+/* Grey out an arrow once that end is reached. */
+function syncRailNav() {
+  const max = railTrack.scrollWidth - railTrack.clientWidth - 2;
+  railPrev.disabled = railTrack.scrollLeft <= 2;
+  railNext.disabled = railTrack.scrollLeft >= max;
 }
-storyFrame.addEventListener("pointerup", releaseHold);
-storyFrame.addEventListener("pointercancel", releaseHold);
-storyFrame.addEventListener("pointerleave", releaseHold);
-
-/* --- explicit pause button (also covers keyboard users) --- */
-const pauseBtn = $("#story-pause");
-pauseBtn.addEventListener("click", () => {
-  userPaused = !userPaused;
-  pauseBtn.setAttribute("aria-pressed", String(userPaused));
-  pauseBtn.setAttribute("aria-label", userPaused ? "Play the story" : "Pause the story");
-  updatePaused();
-});
-
-/* --- keyboard --- */
-storyFrame.tabIndex = 0;
-storyFrame.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowRight") { e.preventDefault(); nextStory(); }
-  if (e.key === "ArrowLeft")  { e.preventDefault(); prevStory(); }
-  if (e.key === " ")          { e.preventDefault(); pauseBtn.click(); }
-});
-
-/* --- swipe --- */
-let swipeX = null;
-storyFrame.addEventListener("touchstart", (e) => { swipeX = e.touches[0].clientX; }, { passive: true });
-storyFrame.addEventListener("touchend", (e) => {
-  if (swipeX === null) return;
-  const dx = e.changedTouches[0].clientX - swipeX;
-  if (Math.abs(dx) > 45) dx < 0 ? nextStory() : prevStory();
-  swipeX = null;
-}, { passive: true });
-
-/* --- only run while it is on screen --- */
-if ("IntersectionObserver" in window) {
-  new IntersectionObserver((entries) => {
-    entries.forEach((entry) => { offScreen = !entry.isIntersecting; });
-    updatePaused();
-  }, { threshold: 0.35 }).observe(story);
-} else {
-  offScreen = false;
-}
-
-document.addEventListener("visibilitychange", () => {
-  offScreen = document.hidden;
-  updatePaused();
-});
+railTrack.addEventListener("scroll", syncRailNav, { passive: true });
+window.addEventListener("resize", syncRailNav);
+syncRailNav();
 
 /* --- full-size view --- */
 const lightbox = $("#lightbox");
 const lbImg = $("#lb-img");
 
-$("#story-expand").addEventListener("click", () => {
-  const slide = storySlides[storyIdx];
-  const img = $(".story__photo", slide);
-  lbImg.src = slide.dataset.full || img.currentSrc || img.src;
+function openLightbox(card) {
+  const img = $(".shot__photo", card);
+  lbImg.src = card.dataset.full || img.currentSrc || img.src;
   lbImg.alt = img.alt;
   lightbox.hidden = false;
   document.body.style.overflow = "hidden";
-  offScreen = true;
-  updatePaused();
   $("#lb-close").focus();
+}
+
+shotCards.forEach((card) => {
+  card.addEventListener("click", () => openLightbox(card));
 });
 
 function closeLightbox() {
   lightbox.hidden = true;
   lbImg.src = "";
   document.body.style.overflow = "";
-  offScreen = false;
-  updatePaused();
 }
 $("#lb-close").addEventListener("click", closeLightbox);
 lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
 });
-
-goStory(0);
-updatePaused();
 
 /* =========================================================
    Nav highlighting + reveal on scroll

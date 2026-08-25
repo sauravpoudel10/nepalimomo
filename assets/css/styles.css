@@ -489,169 +489,119 @@ button{font:inherit;color:inherit}
   font-size:.85rem;
 }
 
-/* ---------- Gallery: story player ---------- */
+/* ---------- Gallery: photo rail ---------- */
 
 #gallery .wrap{margin-bottom:26px}
 .gallery__inner{display:block}
 
-.story{
-  display:flex;align-items:center;justify-content:center;
-  gap:18px;
-  padding-inline:var(--gut);
-}
+.rail{position:relative}
 
-.story__frame{
-  position:relative;
-  width:min(100%, 440px, calc(70svh * 0.8));
-  aspect-ratio:4/5;
-  border-radius:var(--r-lg);
+/* Horizontal strip. Vertical padding leaves room for a hovered card to pop
+   without the scroller clipping it. */
+.rail__track{
+  display:flex;gap:14px;
+  margin:0;padding:30px var(--gut) 34px;
+  list-style:none;
+  overflow-x:auto;
+  scroll-snap-type:x proximity;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.rail__track::-webkit-scrollbar{display:none}
+
+.shot{position:relative;flex:0 0 auto;scroll-snap-align:center}
+.shot:hover,.shot:focus-within{z-index:3}
+
+.shot__card{
+  position:relative;display:block;
+  width:min(74vw,268px);aspect-ratio:4/5;
+  padding:0;border:0;
+  border-radius:var(--r-md);
   overflow:hidden;
-  background:#0B0807;
-  box-shadow:var(--shadow-lg);
-  -webkit-user-select:none;user-select:none;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:pan-y;
+  background:rgba(255,255,255,.07);
+  color:#fff;text-align:left;
+  cursor:zoom-in;
+  box-shadow:0 12px 28px rgba(0,0,0,.34);
+  transition:transform .32s cubic-bezier(.2,.8,.25,1), box-shadow .32s ease;
 }
-
-/* --- slides --- */
-
-.story__stage{position:absolute;inset:0}
-
-.story__slide{
-  position:absolute;inset:0;margin:0;
-  opacity:0;visibility:hidden;
-  transition:opacity .55s ease, visibility .55s;
-}
-.story__slide.is-active{opacity:1;visibility:visible;z-index:2}
-
-.story__bg{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center;
-  filter:blur(28px) saturate(1.25) brightness(.5);
-  transform:scale(1.25);
-}
-
-.story__photo{
-  position:absolute;inset:0;
+.shot__photo{
   width:100%;height:100%;
-  object-fit:contain;
-  transform-origin:center;
-}
-/* slow push-in while a story plays */
-.story__slide.is-active .story__photo{
-  animation:storyZoom var(--story-dur,5s) linear both;
-}
-@keyframes storyZoom{
-  from{transform:scale(1)}
-  to{transform:scale(1.07)}
+  display:block;object-fit:cover;
+  transition:transform .55s cubic-bezier(.2,.8,.25,1);
 }
 
-.story__slide figcaption{
+.shot__caption{
   position:absolute;inset:auto 0 0;
-  z-index:3;
-  padding:64px 20px 22px;
-  background:linear-gradient(180deg,transparent,rgba(8,6,5,.88));
-  color:#fff;
-  font-size:.95rem;font-weight:500;
-  pointer-events:none;
-}
-.story__slide.is-active figcaption{
-  animation:storyCaption .6s .14s both cubic-bezier(.22,1,.36,1);
-}
-@keyframes storyCaption{
-  from{opacity:0;transform:translateY(16px)}
-  to{opacity:1;transform:none}
+  padding:56px 16px 16px;
+  font-family:var(--font-head);font-weight:700;
+  font-size:.95rem;line-height:1.25;
+  background:linear-gradient(to top,rgba(10,7,6,.9),rgba(10,7,6,.55) 46%,rgba(10,7,6,0));
+  opacity:0;transform:translateY(10px);
+  transition:opacity .3s ease, transform .3s cubic-bezier(.2,.8,.25,1);
 }
 
-/* --- progress bars --- */
-
-.story__bars{
-  position:absolute;top:0;left:0;right:0;z-index:6;
-  display:flex;gap:5px;
-  padding:14px 14px 0;
-}
-.story__bar{
-  flex:1;
-  height:3px;padding:0;
-  border:0;border-radius:var(--r-pill);
-  background:rgba(255,255,255,.32);
-  overflow:hidden;cursor:pointer;
-}
-.story__bar::after{
-  content:"";display:block;
-  height:100%;width:0;
-  border-radius:var(--r-pill);
-  background:#fff;
-}
-.story__bar.is-done::after{width:100%}
-.story__bar.is-active::after{
-  animation:storyFill var(--story-dur,5s) linear forwards;
-}
-@keyframes storyFill{from{width:0}to{width:100%}}
-
-/* one switch pauses the bar and the push-in together */
-.story.is-paused .story__bar.is-active::after,
-.story.is-paused .story__slide.is-active .story__photo{
-  animation-play-state:paused;
-}
-
-/* --- tap zones + controls --- */
-
-.story__zone{
-  position:absolute;top:0;bottom:0;z-index:5;
-  border:0;background:transparent;
-  cursor:pointer;
-  font-size:0;color:transparent;
-}
-.story__zone--prev{left:0;width:32%}
-.story__zone--next{right:0;width:68%}
-
-.story__pause,
-.story__expand{
-  position:absolute;z-index:7;
+.shot__zoom{
+  position:absolute;top:12px;right:12px;
   display:grid;place-items:center;
-  width:36px;height:36px;
-  border:0;border-radius:50%;
-  background:rgba(12,9,8,.5);
-  color:#fff;cursor:pointer;
-  backdrop-filter:blur(8px);
-  transition:background .16s ease,transform .16s ease;
+  width:34px;height:34px;
+  border-radius:50%;
+  background:rgba(12,9,8,.62);
+  backdrop-filter:blur(6px);
+  opacity:0;transform:scale(.8);
+  transition:opacity .25s ease, transform .25s cubic-bezier(.2,.8,.25,1);
 }
-.story__pause:hover,.story__expand:hover{background:rgba(12,9,8,.8);transform:scale(1.08)}
-.story__pause{top:30px;right:14px}
-.story__expand{bottom:14px;right:14px}
-.story__pause svg,.story__expand svg{width:17px;height:17px}
-.story__pause svg{fill:currentColor}
-.story__expand svg{
-  fill:none;stroke:currentColor;stroke-width:2.2;
+.shot__zoom svg{
+  width:15px;height:15px;
+  fill:none;stroke:#fff;stroke-width:2.4;
   stroke-linecap:round;stroke-linejoin:round;
 }
-.story__pause .i-play{display:none}
-.story__pause[aria-pressed="true"] .i-pause{display:none}
-.story__pause[aria-pressed="true"] .i-play{display:block}
 
-/* --- arrows either side (desktop) --- */
+/* the pop */
+.shot__card:hover,
+.shot__card:focus-visible{
+  transform:translateY(-12px) scale(1.06);
+  box-shadow:0 30px 60px rgba(0,0,0,.52);
+  outline:none;
+}
+.shot__card:focus-visible{box-shadow:0 0 0 3px var(--yellow), 0 30px 60px rgba(0,0,0,.52)}
+.shot__card:hover .shot__photo,
+.shot__card:focus-visible .shot__photo{transform:scale(1.09)}
+.shot__card:hover .shot__caption,
+.shot__card:focus-visible .shot__caption,
+.shot__card:hover .shot__zoom,
+.shot__card:focus-visible .shot__zoom{opacity:1;transform:none}
+.shot__card:active{transform:translateY(-6px) scale(1.02)}
 
-.story__nav{
-  display:none;
-  align-items:center;justify-content:center;
-  flex:0 0 52px;width:52px;height:52px;
+/* touch screens have no hover, so the caption just stays on */
+@media (hover:none){
+  .shot__caption{opacity:1;transform:none}
+}
+
+.rail__nav{
+  position:absolute;top:50%;z-index:4;
+  display:none;place-items:center;
+  width:46px;height:46px;
+  transform:translateY(-50%);
   border:0;border-radius:50%;
-  background:rgba(253,246,236,.92);
+  background:rgba(255,255,255,.92);
   color:var(--ink);
   cursor:pointer;
   box-shadow:var(--shadow-md);
-  transition:transform .16s ease,background .16s ease;
+  transition:transform .16s ease, background .16s ease, opacity .2s ease;
 }
-.story__nav:hover{background:var(--yellow);transform:scale(1.08)}
-.story__nav svg{
+.rail__nav:hover{background:var(--yellow);transform:translateY(-50%) scale(1.08)}
+.rail__nav[disabled]{opacity:0;pointer-events:none}
+.rail__nav--prev{left:calc(var(--gut) - 22px)}
+.rail__nav--next{right:calc(var(--gut) - 22px)}
+.rail__nav svg{
   width:22px;height:22px;
   fill:none;stroke:currentColor;stroke-width:2.4;
   stroke-linecap:round;stroke-linejoin:round;
 }
 
-.story__hint{
-  margin:18px 0 0;
+.rail__hint{
+  margin:6px 0 0;
   text-align:center;
   font-size:.8rem;
   color:rgba(255,255,255,.4);
@@ -981,31 +931,18 @@ button{font:inherit;color:inherit}
   .mitem{padding:18px 4px}
   .mitem__body h4{font-size:1.08rem}
 
-  /* story: copy on the left, the story card on the right */
-  .gallery__inner{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    align-items:center;
-    column-gap:clamp(32px,5vw,72px);
+  /* gallery: headline centred, the photo rail runs full width beneath it */
+  .gallery__inner{display:block}
+  .gallery__copy{
     max-width:var(--wrap);
     margin-inline:auto;
-    padding-inline:var(--gut);
+    text-align:center;
   }
-  .gallery__copy{
-    grid-column:1;grid-row:1 / 3;
-    align-self:center;
-    max-width:none;padding-inline:0;margin-bottom:0;
-  }
-  /* the column is narrower than a full-width section, so let the
-     headline find its own line breaks and ease the size down */
-  .gallery__copy .br-lg{display:none}
-  .gallery__copy .sechead__title{font-size:clamp(2.1rem,2.9vw,2.8rem)}
-  #gallery .story{grid-column:2;grid-row:1;padding-inline:0;gap:20px}
-  #gallery .story__hint{grid-column:2;grid-row:2;margin-top:18px}
-
-  .story__frame{width:min(430px, calc(74svh * 0.8))}
-  .story__nav{display:flex}
-  .story__slide figcaption{padding:70px 24px 26px;font-size:1rem}
+  .gallery__copy .lede{margin-inline:auto}
+  .shot__card{width:300px}
+  .shot__caption{font-size:1rem;padding:60px 18px 18px}
+  .rail__track{gap:18px;padding-block:34px 38px}
+  .rail__nav{display:grid}
 
   .catering{grid-template-columns:1.05fr .95fr;gap:56px}
   .trays li{padding:18px 20px}
@@ -1050,12 +987,10 @@ button{font:inherit;color:inherit}
     transition-duration:.001ms !important;
   }
   .reveal{opacity:1;transform:none}
-  /* stop the story auto-advancing; the arrows and bars still work */
-  .story__bar.is-active::after{animation:none !important;width:100%}
-  .story__slide.is-active .story__photo{animation:none !important}
+  .rail__track{scroll-behavior:auto}
 }
 
 @media print{
-  .topbar,.stickybar,.orderbar,.story__nav,.story__zone,.toast,.hero__cta{display:none !important}
+  .topbar,.stickybar,.orderbar,.rail__nav,.toast,.hero__cta{display:none !important}
   body{background:#fff}
 }
