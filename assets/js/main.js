@@ -15,15 +15,17 @@ const ORDER_LINKS = {
 /* WhatsApp number that receives orders (digits only, with country code) */
 const WHATSAPP_NUMBER = "61405140747";
 
-/* Opening hours, 24h, keyed by JS day number (0 = Sunday) */
+/* Opening hours, 24h, keyed by JS day number (0 = Sunday).
+   The kitchen runs past midnight, so a closing time earlier than the
+   opening time means "the small hours of the next day". */
 const HOURS = {
-  0: ["11:00", "21:00"],
-  1: ["11:00", "21:30"],
-  2: ["11:00", "21:30"],
-  3: ["11:00", "21:30"],
-  4: ["11:00", "21:30"],
-  5: ["11:00", "22:30"],
-  6: ["11:00", "22:30"]
+  0: ["13:00", "02:00"],
+  1: ["13:00", "02:00"],
+  2: ["13:00", "02:00"],
+  3: ["13:00", "02:00"],
+  4: ["13:00", "02:00"],
+  5: ["13:00", "02:00"],
+  6: ["14:00", "02:00"]
 };
 
 const $  = (sel, root = document) => root.querySelector(sel);
@@ -96,29 +98,47 @@ const pretty = (hhmm) => {
   return m === 0 ? `${hour12}${suffix}` : `${hour12}:${String(m).padStart(2, "0")}${suffix}`;
 };
 
+/* A day's trading window, in minutes from midnight of that day.
+   Past-midnight closings run over 1440. */
+function windowFor(day) {
+  const [openStr, closeStr] = HOURS[day];
+  const open = toMinutes(openStr);
+  let close = toMinutes(closeStr);
+  if (close <= open) close += 1440;
+  return { open, close, closeStr };
+}
+
 function renderStatus() {
   const el = $("#status");
   if (!el) return;
 
   const { day, minutes } = sydneyNow();
-  const [openStr, closeStr] = HOURS[day];
-  const open = toMinutes(openStr);
-  const close = toMinutes(closeStr);
   const text = $(".status__text", el);
+
+  const today = windowFor(day);
+  /* Yesterday's session may still be running in the small hours. */
+  const carry = windowFor((day + 6) % 7);
+  let live = null;
+
+  if (minutes >= today.open && minutes < today.close) {
+    live = today;
+  } else if (carry.close > 1440 && minutes < carry.close - 1440) {
+    live = { open: carry.open - 1440, close: carry.close - 1440, closeStr: carry.closeStr };
+  }
 
   el.classList.remove("is-open", "is-closed");
 
-  if (minutes >= open && minutes < close) {
+  if (live) {
     el.classList.add("is-open");
-    const left = close - minutes;
+    const left = live.close - minutes;
     text.textContent = left <= 60
       ? `Open now · last orders in ${left} min`
-      : `Open now · closes ${pretty(closeStr)}`;
+      : `Open now · closes ${pretty(live.closeStr)}`;
   } else {
     el.classList.add("is-closed");
-    const nextDay = minutes < open ? day : (day + 1) % 7;
-    const nextOpen = HOURS[nextDay][0];
-    text.textContent = minutes < open
+    const opensToday = minutes < today.open;
+    const nextOpen = HOURS[opensToday ? day : (day + 1) % 7][0];
+    text.textContent = opensToday
       ? `Closed · opens ${pretty(nextOpen)} today`
       : `Closed · opens ${pretty(nextOpen)} tomorrow`;
   }
