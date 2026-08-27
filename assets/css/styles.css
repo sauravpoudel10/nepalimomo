@@ -491,7 +491,8 @@ button{font:inherit;color:inherit}
 
 /* ---------- Gallery: photo rail ---------- */
 
-#gallery .wrap{margin-bottom:26px}
+#gallery .wrap,
+#food .wrap{margin-bottom:26px}
 .gallery__inner{display:block}
 
 .rail{position:relative}
@@ -540,6 +541,15 @@ button{font:inherit;color:inherit}
   opacity:0;transform:translateY(10px);
   transition:opacity .3s ease, transform .3s cubic-bezier(.2,.8,.25,1);
 }
+
+.shot__caption strong{
+  display:block;
+  margin-bottom:2px;
+  font-size:1.05rem;
+  color:var(--yellow);
+}
+.shot__caption strong + *,
+.shot__caption strong ~ br{font-weight:600}
 
 .shot__zoom{
   position:absolute;top:12px;right:12px;

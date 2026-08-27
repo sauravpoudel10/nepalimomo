@@ -332,42 +332,43 @@ $("#cart-clear").addEventListener("click", () => {
 renderCart();
 
 /* =========================================================
-   Gallery photo rail
+   Photo rails (food + gallery)
    A horizontal strip of cards: hover pops a card out,
    click opens the full-size photo.
    ========================================================= */
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const rail      = $("#gallery-rail");
-const railTrack = $("#rail-track");
-const railPrev  = $("#rail-prev");
-const railNext  = $("#rail-next");
-const shotCards = $$(".shot__card", rail);
+function setupRail(rail) {
+  const track = $(".rail__track", rail);
+  const prev  = $(".rail__nav--prev", rail);
+  const next  = $(".rail__nav--next", rail);
+  if (!track) return;
 
-/* One card plus the gap between cards. */
-function railStep() {
-  const card = $(".shot", railTrack);
-  if (!card) return railTrack.clientWidth * 0.8;
-  const gap = parseFloat(getComputedStyle(railTrack).columnGap) || 0;
-  return card.getBoundingClientRect().width + gap;
+  /* One card plus the gap between cards. */
+  const step = () => {
+    const card = $(".shot", track);
+    if (!card) return track.clientWidth * 0.8;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    return card.getBoundingClientRect().width + gap;
+  };
+
+  const scrollBy = (dir) => track.scrollBy({ left: dir * step(), behavior: "smooth" });
+
+  /* Grey out an arrow once that end is reached. */
+  const syncNav = () => {
+    const max = track.scrollWidth - track.clientWidth - 2;
+    if (prev) prev.disabled = track.scrollLeft <= 2;
+    if (next) next.disabled = track.scrollLeft >= max;
+  };
+
+  if (prev) prev.addEventListener("click", () => scrollBy(-1));
+  if (next) next.addEventListener("click", () => scrollBy(1));
+  track.addEventListener("scroll", syncNav, { passive: true });
+  window.addEventListener("resize", syncNav);
+  syncNav();
 }
 
-function railScroll(dir) {
-  railTrack.scrollBy({ left: dir * railStep(), behavior: "smooth" });
-}
-
-railPrev.addEventListener("click", () => railScroll(-1));
-railNext.addEventListener("click", () => railScroll(1));
-
-/* Grey out an arrow once that end is reached. */
-function syncRailNav() {
-  const max = railTrack.scrollWidth - railTrack.clientWidth - 2;
-  railPrev.disabled = railTrack.scrollLeft <= 2;
-  railNext.disabled = railTrack.scrollLeft >= max;
-}
-railTrack.addEventListener("scroll", syncRailNav, { passive: true });
-window.addEventListener("resize", syncRailNav);
-syncRailNav();
+$$(".rail").forEach(setupRail);
 
 /* --- full-size view --- */
 const lightbox = $("#lightbox");
@@ -382,7 +383,7 @@ function openLightbox(card) {
   $("#lb-close").focus();
 }
 
-shotCards.forEach((card) => {
+$$(".shot__card").forEach((card) => {
   card.addEventListener("click", () => openLightbox(card));
 });
 
