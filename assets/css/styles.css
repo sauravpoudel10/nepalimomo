@@ -626,6 +626,129 @@ button{font:inherit;color:inherit}
 .trays strong{font-family:var(--font-head);font-weight:700;font-size:1rem}
 .trays span{font-size:.85rem;color:rgba(23,18,16,.66)}
 
+/* ---------- Parking ---------- */
+
+.parking{
+  position:relative;
+  display:grid;gap:18px;
+  padding:26px 22px 24px;
+  border-radius:var(--r-lg);
+  background:linear-gradient(135deg,var(--yellow) 0%,var(--yellow-deep) 100%);
+  color:var(--ink);
+  box-shadow:var(--shadow-md);
+  overflow:hidden;
+}
+/* soft yellow glow so the panel reads as a highlight, not a flat block */
+.parking::after{
+  content:"";
+  position:absolute;right:-70px;top:-70px;
+  width:230px;height:230px;border-radius:50%;
+  background:rgba(255,255,255,.28);
+  pointer-events:none;
+}
+
+.parking__badge{
+  position:relative;z-index:1;
+  display:grid;place-items:center;
+  width:52px;height:52px;
+  border-radius:50%;
+  background:var(--ink);color:var(--yellow);
+  font-family:var(--font-head);font-weight:800;font-size:1.5rem;
+  box-shadow:var(--shadow-sm);
+}
+
+.parking__body{position:relative;z-index:1}
+
+.parking__title{
+  margin:0 0 16px;
+  font-family:var(--font-head);
+  font-weight:800;
+  font-size:clamp(1.7rem,6vw,2.3rem);
+  line-height:1.04;letter-spacing:-.025em;
+}
+
+.parking__rules{
+  display:grid;gap:12px;
+  margin:0 0 20px;padding:0;list-style:none;
+}
+.parking__rules li{
+  display:flex;flex-direction:column;gap:3px;
+  padding:14px 16px;
+  border-radius:var(--r-sm);
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(23,18,16,.10);
+}
+.parking__rules strong{
+  font-family:var(--font-head);
+  font-weight:700;font-size:.78rem;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--pink);
+}
+.parking__rules span{font-size:.95rem;color:rgba(23,18,16,.82)}
+
+.parking__cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn--ghost-ink{
+  --btn-bg:transparent;--btn-fg:var(--ink);
+  border:1.5px solid rgba(23,18,16,.35);
+}
+.btn--ghost-ink:hover{--btn-bg:rgba(23,18,16,.08)}
+
+/* ---------- Booking form ---------- */
+
+.book{max-width:560px;margin:26px auto 0}
+.form{display:grid;gap:16px}
+.field{display:grid;gap:6px}
+.field--row{grid-template-columns:1fr 1fr;gap:14px}
+.field label,.field legend{
+  font-family:var(--font-head);
+  font-weight:700;font-size:.8rem;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);
+}
+.field input,.field select,.field textarea{
+  width:100%;
+  min-height:52px;
+  padding:12px 14px;
+  border:1.5px solid var(--line);
+  border-radius:var(--r-sm);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);font-size:1rem;
+}
+.field textarea{min-height:96px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;
+  border-color:var(--yellow-deep);
+  box-shadow:0 0 0 3px rgba(255,195,0,.32);
+}
+.field__hint{font-size:.82rem;color:var(--muted)}
+.field__error{font-size:.82rem;color:var(--pink);font-weight:600}
+.field input:invalid:not(:placeholder-shown){border-color:var(--pink)}
+
+.book__note{
+  margin:0;padding:14px 16px;
+  border-radius:var(--r-sm);
+  background:rgba(255,195,0,.18);
+  border:1px solid rgba(242,169,0,.4);
+  font-size:.9rem;color:rgba(23,18,16,.82);
+}
+.book__done{
+  margin-top:18px;padding:18px;
+  border-radius:var(--r-md);
+  background:var(--paper);
+  box-shadow:var(--shadow-sm);
+}
+.book__done h3{margin:0 0 6px;font-family:var(--font-head);font-size:1.1rem}
+.book__done p{margin:0;color:var(--muted);font-size:.92rem}
+
+.book__back{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-bottom:18px;
+  color:var(--pink);font-weight:600;font-size:.92rem;
+  text-decoration:none;
+}
+.book__back:hover{text-decoration:underline}
+
 /* ---------- Visit ---------- */
 
 .visit{display:grid;gap:14px;margin-top:22px}
@@ -943,6 +1066,15 @@ button{font:inherit;color:inherit}
   .shot__caption{font-size:1rem;padding:60px 18px 18px}
   .rail__track{gap:18px;padding-block:34px 38px}
   .rail__nav{display:grid}
+
+  .parking{
+    grid-template-columns:auto 1fr;
+    align-items:start;
+    gap:28px;
+    padding:34px 34px 32px;
+  }
+  .parking__rules{grid-template-columns:1fr 1fr;gap:14px}
+  .field--row{gap:16px}
 
   .catering{grid-template-columns:1.05fr .95fr;gap:56px}
   .trays li{padding:18px 20px}
