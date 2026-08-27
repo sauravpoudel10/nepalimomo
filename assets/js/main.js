@@ -28,6 +28,10 @@ const HOURS = {
   6: ["14:00", "02:00"]
 };
 
+/* Dining room stops half an hour before the doors do: last sit-down
+   orders at 1:30am, take-away keeps going until 2:00am. */
+const TAKEAWAY_ONLY_MINUTES = 30;
+
 const $  = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -91,12 +95,16 @@ const toMinutes = (hhmm) => {
   return h * 60 + m;
 };
 
-const pretty = (hhmm) => {
-  const [h, m] = hhmm.split(":").map(Number);
+const prettyMinutes = (mins) => {
+  const wrapped = ((mins % 1440) + 1440) % 1440;
+  const h = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
   const suffix = h >= 12 ? "pm" : "am";
   const hour12 = h % 12 === 0 ? 12 : h % 12;
   return m === 0 ? `${hour12}${suffix}` : `${hour12}:${String(m).padStart(2, "0")}${suffix}`;
 };
+
+const pretty = (hhmm) => prettyMinutes(toMinutes(hhmm));
 
 /* A day's trading window, in minutes from midnight of that day.
    Past-midnight closings run over 1440. */
@@ -130,10 +138,16 @@ function renderStatus() {
 
   if (live) {
     el.classList.add("is-open");
-    const left = live.close - minutes;
-    text.textContent = left <= 60
-      ? `Open now · last orders in ${left} min`
-      : `Open now · closes ${pretty(live.closeStr)}`;
+    const diningClose = live.close - TAKEAWAY_ONLY_MINUTES;
+    const leftDining = diningClose - minutes;
+
+    if (minutes >= diningClose) {
+      text.textContent = `Take-away only · closes ${pretty(live.closeStr)}`;
+    } else if (leftDining <= 60) {
+      text.textContent = `Open now · last dine-in orders in ${leftDining} min`;
+    } else {
+      text.textContent = `Open now · dine-in till ${prettyMinutes(diningClose)}`;
+    }
   } else {
     el.classList.add("is-closed");
     const opensToday = minutes < today.open;
